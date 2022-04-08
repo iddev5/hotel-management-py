@@ -15,7 +15,10 @@ class Application:
                 name varchar(120) primary key not null,
                 room_no int,
                 room_type char(1) check(room_type in ('n', 'd', 'l')),
-                check_date varchar(10)
+                check_date varchar(10),
+                rbill int default 0,
+                gbill int default 0,
+                lbill int default 0
             );
         """
         )
@@ -30,7 +33,8 @@ class Application:
         print("1. Check-in")
         print("2. Check-out")
         print("3. Calculate Bill")
-        print("4. Guest info")
+        print("4. Add Bill")
+        print("5. Guest info")
         print("9. Dump all (Debug only)")
         print("0. Exit")
 
@@ -39,7 +43,8 @@ class Application:
             case 1: self.check_in()
             case 2: self.check_out()
             case 3: self.calculate_bill()
-            case 4: self.guest_info()
+            case 4: self.add_bill()
+            case 5: self.guest_info()
             case 9: self.dump_all()
             case 0: self.decision = False
             case _: print("Unknown option")
@@ -75,15 +80,45 @@ class Application:
     def calculate_bill(self):
         name = input("Enter guest name: ")
 
-        self.cursor.execute(f"select room_type, check_date from guests where name='{name}';")
+        self.cursor.execute(f"select room_type, check_date, rbill, gbill, lbill from guests where name='{name}';")
         data = self.cursor.fetchone()
 
         room_map = {'n': 1000, 'd': 2500, 'l': 4000}
         num_days = (datetime.date.today() - datetime.date.fromisoformat(data[1])).days + 1
         room_bill = room_map[data[0]] * num_days
 
+        rbill = int(data[2])
+        gbill = int(data[3])
+        lbill = int(data[4])
+
         print("Bill breakdown: ")
         print(f"  Room bill: {room_bill}")
+        if rbill != 0: print(f"  Restaurant bill: {rbill}")
+        if gbill != 0: print(f"  Game bill: {gbill}")
+        if lbill != 0: print(f"  Laundary bill: {lbill}")
+        print(" ", "-"*20)
+        print(f"  Total bill: {room_bill+rbill+gbill+lbill}")
+
+    def add_bill(self):
+        name = input("Enter guest name: ")
+
+        print()
+        print("Bill options\n")
+        print("1. Restaurant bill")
+        print("2. Game bill")
+        print("3. Laundary bill")
+        option = int(input("Enter bill type: "))
+
+        bill_keys = {1: "rbill", 2: "gbill", 3: "lbill"}
+        key = bill_keys.get(option)
+        if option is None:
+            pass # error here
+
+        amount = int(input("Enter bill amount: "))
+        if amount != 0:
+            self.cursor.execute(f"select {key} from guests where name='{name}'")
+            prev_amount = int(self.cursor.fetchone()[0])
+            self.cursor.execute(f"update guests set {key}={prev_amount+amount}")
 
     def guest_info(self):
         name = input("Enter guest name: ")
