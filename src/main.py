@@ -1,8 +1,10 @@
 import sqlite3 as sql
 import datetime
+import sys
 
 class Application:
     decision: bool = True
+    debug: bool = False
 
     def __init__(self, connection, cursor):
         self.connection = connection
@@ -23,7 +25,8 @@ class Application:
         """
         )
 
-    def run(self):
+    def run(self, debug=False):
+        self.debug = debug
         while self.decision:
             self.menu()
 
@@ -35,7 +38,7 @@ class Application:
         print("3. Calculate Bill")
         print("4. Add Bill")
         print("5. Guest info")
-        print("9. Dump all (Debug only)")
+        if self.debug: print("9. Dump all (Debug only)")
         print("0. Exit")
 
         option = int(input("Enter option: "))
@@ -46,7 +49,7 @@ class Application:
             case 3: self.calculate_bill()
             case 4: self.add_bill()
             case 5: self.guest_info()
-            case 9: self.dump_all()
+            case 9 if self.debug: self.dump_all()
             case 0: self.decision = False
             case _: print("Unknown option")
         print()
@@ -194,7 +197,7 @@ class Application:
 def main():
     with sql.connect("database.db") as connection:
         cursor = connection.cursor()
-        Application(connection, cursor).run()
+        Application(connection, cursor).run(len(sys.argv) > 1 and sys.argv[1].lower() == "debug")
 
 if __name__ == "__main__":
     main()
