@@ -127,10 +127,17 @@ class Application:
             pass # error here
 
         amount = int(input("Enter bill amount: "))
-        if amount != 0:
-            self.cursor.execute(f"select {key} from guests where name='{name}'")
-            prev_amount = int(self.cursor.fetchone()[0])
-            self.cursor.execute(f"update guests set {key}={prev_amount+amount}")
+        if amount == 0:
+            return
+
+        self.cursor.execute(f"select {key} from guests where name='{name}'")
+        prev_amount = int(self.cursor.fetchone()[0])
+        self.cursor.execute(f"update guests set {key}={prev_amount+amount}")
+
+        self._calculate_bill(name)
+        if input("Confirm changes to bill? (Y/n): ").lower() == 'n':
+            self.connection.rollback()
+        else:
             self.connection.commit()
 
     def guest_info(self):
