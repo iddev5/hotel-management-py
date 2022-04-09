@@ -2,7 +2,7 @@ import sqlite3 as sql
 import datetime
 import sys
 
-class Application:
+class HotelApplication:
     decision: bool = True
     debug: bool = False
 
@@ -197,7 +197,8 @@ class Application:
 def main():
     with sql.connect("database.db") as connection:
         cursor = connection.cursor()
-        Application(connection, cursor).run(len(sys.argv) > 1 and sys.argv[1].lower() == "debug")
+        debug = len(sys.argv) > 1 and sys.argv[1].lower() == "debug"
+        HotelApplication(connection, cursor).run(debug)
 
 if __name__ == "__main__":
     main()
