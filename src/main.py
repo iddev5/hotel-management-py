@@ -51,11 +51,20 @@ class Application:
             case _: print("Unknown option")
         print()
 
+    def _check_for_guest(self, name) -> bool:
+        self.cursor.execute(f"select name from guests where name='{name}';")
+        if self.cursor.fetchone() is None:
+            return False
+        return True
+
     def check_in(self):
         name = input("Enter guest name: ")
         if len(name) > 120:
             print("Entered name is too large")
         room_type = input("Choose room type (Normal 'n' default, Delux 'd', Luxury 'l'): ").lower()
+        if room_type not in ['n', 'd', 'l']:
+            print("Incorrect room type selected")
+            return
 
         # Get a valid room number (or reuse existing ones)
         room_no = self.room_count if len(self.rooms) == 0 else self.rooms.pop()
@@ -74,6 +83,10 @@ class Application:
 
     def check_out(self):
         name = input("Enter guest name: ")
+
+        if not self._check_for_guest(name):
+            print(f"Guest '{name}' not found")
+            return
 
         self._guest_info(name)
         self._calculate_bill(name)
@@ -94,6 +107,9 @@ class Application:
     def _calculate_bill(self, name):
         self.cursor.execute(f"select room_type, check_date, rbill, gbill, lbill from guests where name='{name}';")
         data = self.cursor.fetchone()
+        if data is None:
+            print(f"Guest '{name}' not found")
+            return
 
         (room_type, check_date, rbill, gbill, lbill) = data
 
@@ -112,6 +128,10 @@ class Application:
     def add_bill(self):
         name = input("Enter guest name: ")
 
+        if not self._check_for_guest(name):
+            print(f"Guest '{name}' not found")
+            return
+
         print()
         print("Bill options\n")
         print("1. Restaurant bill")
@@ -121,15 +141,22 @@ class Application:
 
         bill_keys = {1: "rbill", 2: "gbill", 3: "lbill"}
         key = bill_keys.get(option)
-        if option is None:
-            pass # error here
+
+        if key is None:
+            print("Incorrect bill type")
+            return
 
         amount = int(input("Enter bill amount: "))
         if amount == 0:
             return
 
         self.cursor.execute(f"select {key} from guests where name='{name}'")
-        prev_amount = int(self.cursor.fetchone()[0])
+        data = self.cursor.fetchone()
+        if data is None:
+            print(f"Guest '{name}' not found")
+            return
+
+        prev_amount = int(data[0])
         self.cursor.execute(f"update guests set {key}={prev_amount+amount}")
 
         self._calculate_bill(name)
@@ -144,7 +171,12 @@ class Application:
 
     def _guest_info(self, name: str):
         self.cursor.execute(f"select name, room_no, room_type, check_date from guests where name='{name}';")
-        (name, room_no, room_type, check_date) = self.cursor.fetchone()
+        data = self.cursor.fetchone()
+        if data is None:
+            print(f"Guest '{name}' not found")
+            return
+
+        (name, room_no, room_type, check_date) = data
         room_type_class = {"n": "Normal", "d": "Delux", "l": "Luxury"}
         room_type_str = room_type_class.get(room_type)
 
