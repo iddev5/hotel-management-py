@@ -123,6 +123,7 @@ class Application:
             self.cursor.execute(f"select {key} from guests where name='{name}'")
             prev_amount = int(self.cursor.fetchone()[0])
             self.cursor.execute(f"update guests set {key}={prev_amount+amount}")
+            self.connection.commit()
 
     def guest_info(self):
         name = input("Enter guest name: ")
