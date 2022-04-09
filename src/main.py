@@ -67,19 +67,23 @@ class Application:
 
     def check_out(self):
         name = input("Enter guest name: ")
-        
-        # Get room number
-        self.cursor.execute(f"select room_no from guests where name='{name}';")
-        data = self.cursor.fetchone()
-        self.rooms.append(data[0])
 
-        # Delete
-        self.cursor.execute(f"delete from guests where name='{name}';")
-        self.connection.commit()
+        self._calculate_bill(name)
+        if input("Confirm checkout? (y/N): ").lower() == 'y':
+            # Get room number
+            self.cursor.execute(f"select room_no from guests where name='{name}';")
+            data = self.cursor.fetchone()
+            self.rooms.append(data[0])
+
+            # Delete
+            self.cursor.execute(f"delete from guests where name='{name}';")
+            self.connection.commit()
 
     def calculate_bill(self):
         name = input("Enter guest name: ")
+        self._calculate_bill(name)
 
+    def _calculate_bill(self, name):
         self.cursor.execute(f"select room_type, check_date, rbill, gbill, lbill from guests where name='{name}';")
         data = self.cursor.fetchone()
 
