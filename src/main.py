@@ -56,14 +56,20 @@ class Application:
             print("Entered name is too large")
         room_type = input("Choose room type (Normal 'n' default, Delux 'd', Luxury 'l'): ").lower()
 
-        # Get a valid room number
+        # Get a valid room number (or reuse existing ones)
         room_no = self.room_count if len(self.rooms) == 0 else self.rooms.pop()
         self.room_count += 1
 
         check_date = datetime.date.today()
 
         self.cursor.execute(f"insert into guests (name, room_no, room_type, check_date) values ('{name}', {room_no}, '{room_type}', '{check_date}');")
-        self.connection.commit()
+
+        # Confirm if details are correct
+        self._guest_info(name);
+        if input("Confirm details? (Y/n): ").lower() == 'n':
+            self.connection.rollback()
+        else:
+            self.connection.commit()
 
     def check_out(self):
         name = input("Enter guest name: ")
