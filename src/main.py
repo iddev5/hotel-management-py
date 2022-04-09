@@ -68,6 +68,7 @@ class Application:
     def check_out(self):
         name = input("Enter guest name: ")
 
+        self._guest_info(name)
         self._calculate_bill(name)
         if input("Confirm checkout? (y/N): ").lower() == 'y':
             # Get room number
@@ -127,12 +128,15 @@ class Application:
 
     def guest_info(self):
         name = input("Enter guest name: ")
+        self._guest_info(name);
+
+    def _guest_info(self, name: str):
         self.cursor.execute(f"select name, room_no, room_type, check_date from guests where name='{name}';")
         (name, room_no, room_type, check_date) = self.cursor.fetchone()
         room_type_class = {"n": "Normal", "d": "Delux", "l": "Luxury"}
         room_type_str = room_type_class.get(room_type)
 
-        print("Guest info\n")
+        print("Guest info")
         print(f"  Name: {name}")
         print(f"  Room no: {room_no}")
         print(f"  Room type: {room_type_str}")
