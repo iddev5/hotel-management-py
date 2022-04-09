@@ -126,9 +126,16 @@ class Application:
 
     def guest_info(self):
         name = input("Enter guest name: ")
-        self.cursor.execute(f"select * from guests where name='{name}';")
-        data = self.cursor.fetchone()
-        print(data)
+        self.cursor.execute(f"select name, room_no, room_type, check_date from guests where name='{name}';")
+        (name, room_no, room_type, check_date) = self.cursor.fetchone()
+        room_type_class = {"n": "Normal", "d": "Delux", "l": "Luxury"}
+        room_type_str = room_type_class.get(room_type)
+
+        print("Guest info\n")
+        print(f"  Name: {name}")
+        print(f"  Room no: {room_no}")
+        print(f"  Room type: {room_type_str}")
+        print(f"  Check in date: {check_date}")
 
     def dump_all(self):
         self.cursor.execute("select * from guests")
