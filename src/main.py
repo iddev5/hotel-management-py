@@ -39,6 +39,7 @@ class Application:
         print("0. Exit")
 
         option = int(input("Enter option: "))
+        print()
         match option:
             case 1: self.check_in()
             case 2: self.check_out()
@@ -48,7 +49,7 @@ class Application:
             case 9: self.dump_all()
             case 0: self.decision = False
             case _: print("Unknown option")
-        print("\n")
+        print()
 
     def check_in(self):
         name = input("Enter guest name: ")
@@ -142,7 +143,7 @@ class Application:
         room_type_class = {"n": "Normal", "d": "Delux", "l": "Luxury"}
         room_type_str = room_type_class.get(room_type)
 
-        print("Guest info")
+        print("Guest info:")
         print(f"  Name: {name}")
         print(f"  Room no: {room_no}")
         print(f"  Room type: {room_type_str}")
