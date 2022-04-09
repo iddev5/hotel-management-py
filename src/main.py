@@ -95,13 +95,11 @@ class Application:
         self.cursor.execute(f"select room_type, check_date, rbill, gbill, lbill from guests where name='{name}';")
         data = self.cursor.fetchone()
 
-        room_map = {'n': 1000, 'd': 2500, 'l': 4000}
-        num_days = (datetime.date.today() - datetime.date.fromisoformat(data[1])).days + 1
-        room_bill = room_map[data[0]] * num_days
+        (room_type, check_date, rbill, gbill, lbill) = data
 
-        rbill = int(data[2])
-        gbill = int(data[3])
-        lbill = int(data[4])
+        room_map = {'n': 1000, 'd': 2500, 'l': 4000}
+        num_days = (datetime.date.today() - datetime.date.fromisoformat(check_date)).days + 1
+        room_bill = room_map[room_type] * num_days
 
         print("Bill breakdown: ")
         print(f"  Room bill: {room_bill}")
